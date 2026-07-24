@@ -1,0 +1,23 @@
+# Knight models generated for Tabletop Simulator
+
+newmtl french_knight_blue
+Ka 0.2 0.2 0.2
+Kd 0.2353 0.3529 0.6667
+Ks 0.3 0.3 0.3
+Ns 20
+newmtl french_knight_blue_plume
+Ka 0.2 0.2 0.2
+Kd 1.0000 0.8431 0.0000
+Ks 0.1 0.1 0.1
+Ns 10
+
+newmtl french_knight_red
+Ka 0.2 0.2 0.2
+Kd 0.6275 0.1569 0.1569
+Ks 0.3 0.3 0.3
+Ns 20
+newmtl french_knight_red_plume
+Ka 0.2 0.2 0.2
+Kd 1.0000 0.8431 0.0000
+Ks 0.1 0.1 0.1
+Ns 10
