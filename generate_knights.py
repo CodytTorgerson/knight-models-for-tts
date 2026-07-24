@@ -1,11 +1,7 @@
-"""Generate simple low-poly knight models for Tabletop Simulator.
+"""Generate simple, clean knight models for Tabletop Simulator.
 
-Tabletop Simulator requires:
-  - Model/Mesh: .obj (triangulated, under 25k verts)
-  - Diffuse/Image: .png or .jpg (required, the material must be an image)
-
-This script writes one .obj + one .png per knight colour so you can paste
-both URLs directly into TTS without dealing with multi-material .mtl files.
+Each knight is a single low-poly mesh with a small solid-colour PNG texture.
+TTS requires a .obj file and a .png diffuse image for Custom Model import.
 """
 
 import math
@@ -17,7 +13,7 @@ OUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def build_knight_geometry():
-    """Return a single low-poly knight mesh with simple UVs."""
+    """Return a compact, board-game-style knight mesh."""
 
     vertices = []
     uvs = []
@@ -33,17 +29,17 @@ def build_knight_geometry():
     def make_cylinder(y_base, y_top, radius, segments, u_base=0.0, v_scale=1.0):
         faces_out = []
         for i in range(segments):
-            angle = 2 * math.pi * i / segments
-            angle_next = 2 * math.pi * (i + 1) / segments
-            x0 = math.cos(angle) * radius
-            z0 = math.sin(angle) * radius
-            x1 = math.cos(angle_next) * radius
-            z1 = math.sin(angle_next) * radius
+            a0 = 2 * math.pi * i / segments
+            a1 = 2 * math.pi * (i + 1) / segments
+            x0 = math.cos(a0) * radius
+            z0 = math.sin(a0) * radius
+            x1 = math.cos(a1) * radius
+            z1 = math.sin(a1) * radius
 
             u0 = i / segments
             u1 = (i + 1) / segments
-            v0 = v_scale * y_base
-            v1 = v_scale * y_top
+            v0 = y_base
+            v1 = y_top
 
             v0_idx = add_vertex(x0, y_base, z0, x0, 0.0, z0, u0, v0)
             v1_idx = add_vertex(x1, y_base, z1, x1, 0.0, z1, u1, v0)
@@ -51,12 +47,6 @@ def build_knight_geometry():
             v3_idx = add_vertex(x0, y_top, z0, x0, 0.0, z0, u0, v1)
             faces_out.append([(v0_idx, u0, v0), (v1_idx, u1, v0), (v2_idx, u1, v1)])
             faces_out.append([(v0_idx, u0, v0), (v2_idx, u1, v1), (v3_idx, u0, v1)])
-
-            # cap top
-            center_top = add_vertex(0, y_top, 0, 0, 1, 0, 0.5, 0.5)
-            vt0 = add_vertex(x0, y_top, z0, 0, 1, 0, u0, 0.9)
-            vt1 = add_vertex(x1, y_top, z1, 0, 1, 0, u1, 0.9)
-            faces_out.append([(center_top, 0.5, 0.5), (vt0, u0, 0.9), (vt1, u1, 0.9)])
         return faces_out
 
     def make_sphere(cx, cy, cz, radius, stacks, slices):
@@ -105,11 +95,11 @@ def build_knight_geometry():
             (-hw, -hh, -hd), (hw, -hh, -hd), (hw, hh, -hd), (-hw, hh, -hd),
             (-hw, -hh, hd),  (hw, -hh, hd),  (hw, hh, hd),  (-hw, hh, hd),
         ]
-        normals = [
+        box_normals = [
             (0, 0, -1), (0, 0, -1), (0, 0, -1), (0, 0, -1),
             (0, 0, 1),  (0, 0, 1),  (0, 0, 1),  (0, 0, 1),
         ]
-        for p, n in zip(pts, normals):
+        for p, n in zip(pts, box_normals):
             add_vertex(cx + p[0], cy + p[1], cz + p[2], n[0], n[1], n[2], 0.5, 0.5)
         quads = [
             (0, 1, 2, 3), (4, 5, 6, 7), (0, 1, 5, 4),
@@ -133,51 +123,32 @@ def build_knight_geometry():
                 vertices[vi] = (ox + x, oy, oz + z)
         return f
 
-    # Base / boots
-    faces += make_cylinder(0.0, 0.12, 0.16, 16)
-    # Torso
-    faces += make_cylinder(0.12, 0.52, 0.22, 16)
-    # Shoulders
-    faces += make_cylinder(0.48, 0.56, 0.28, 16)
-    # Head / helmet
-    faces += make_sphere(0.0, 0.72, 0.0, 0.18, 8, 16)
-    # Helmet ridge / nasal guard
-    faces += make_box(0.0, 0.68, 0.16, 0.06, 0.16, 0.04)
-    # Plume
-    plume_faces = make_cylinder(0.88, 1.06, 0.06, 8)
-    for face in plume_faces:
-        for vi, _, _ in face:
-            vertices[vi] = (vertices[vi][0], vertices[vi][1], vertices[vi][2])
-    faces += plume_faces
-    # Shield on chest
-    faces += make_box(0.0, 0.32, 0.23, 0.22, 0.28, 0.04)
-    # Arms
-    faces += make_offset_cylinder(-0.26, 0.0, 0.30, 0.48, 0.07, 10)
-    faces += make_offset_cylinder(0.26, 0.0, 0.30, 0.48, 0.07, 10)
-    # Lance
-    lance_faces = make_cylinder(0.15, 1.05, 0.025, 8)
-    for face in lance_faces:
+    # Board-game knight: short, wide, stable pawn-like shape
+    # Wide base
+    faces += make_cylinder(0.00, 0.10, 0.22, 20)
+    faces += make_cylinder(0.10, 0.24, 0.20, 18)
+    # Torso tapering in
+    faces += make_cylinder(0.24, 0.36, 0.16, 16)
+    faces += make_cylinder(0.36, 0.46, 0.12, 14)
+    # Helmet dome
+    faces += make_sphere(0.0, 0.54, 0.0, 0.13, 8, 16)
+    # Visor slit / nasal guard
+    faces += make_box(0.0, 0.52, 0.12, 0.03, 0.05, 0.02)
+    # Plume crest: a vertical fin on top of helmet
+    plume = make_cylinder(0.62, 0.70, 0.025, 6)
+    for face in plume:
         for vi, _, _ in face:
             ox, oy, oz = vertices[vi]
-            vertices[vi] = (ox + 0.34, oy, oz + 0.08)
-    faces += lance_faces
-    # Banner crossbar
-    banner_faces = make_cylinder(0.92, 1.02, 0.03, 8)
-    for face in banner_faces:
-        for vi, _, _ in face:
-            ox, oy, oz = vertices[vi]
-            vertices[vi] = (ox + 0.34, oy, oz + 0.08)
-    faces += banner_faces
+            vertices[vi] = (ox, oy, oz + 0.06)
+    faces += plume
+    # Shield embossed on chest
+    faces += make_box(0.0, 0.24, 0.13, 0.10, 0.14, 0.025)
 
     return vertices, normals, uvs, faces
 
 
 def make_texture(name, armor_rgb, plume_rgb, size=64):
-    """Create a tiny solid-colour PNG texture.
-
-    The bottom half is armour colour, the top half is plume/accent colour.
-    Since UVs are simple, this gives the knight the intended team colours.
-    """
+    """Create a small PNG texture: top half plume colour, bottom half armour."""
     img = Image.new("RGB", (size, size), armor_rgb)
     px = img.load()
     for y in range(size // 2, size):
@@ -216,7 +187,6 @@ def write_obj(name, vertices, normals, uvs, faces):
         for face in faces:
             parts = []
             for v_idx, u, v in face:
-                # OBJ indices are 1-based
                 parts.append(f"{v_idx + 1}/{len(parts) + 1}/{v_idx + 1}")
             obj.write("f " + " ".join(parts) + "\n")
 
