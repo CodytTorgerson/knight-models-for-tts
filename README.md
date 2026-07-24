@@ -14,11 +14,17 @@ This folder contains simple low-poly OBJ+MTL models for French and English knigh
 
 ## How to add them to Tabletop Simulator
 
-1. **Place the files where TTS can see them.**
-   The easiest way is to upload the `.obj` and `.mtl` files to a public cloud folder and get a direct URL for each file.  TTS cannot load models from your local disk unless you run a local web server.
+1. **Use the GitHub raw URLs.**
+   Because the models are in a public GitHub repo, you can load them directly into Tabletop Simulator.
 
-   - Upload `french_knights.obj` and `french_knights.mtl` to the same folder and make them public.
-   - Do the same for `english_knights.obj` and `english_knights.mtl`.
+   | File | Raw URL |
+   |------|---------|
+   | French model | `https://raw.githubusercontent.com/CodytTorgerson/knight-models-for-tts/master/french_knights.obj` |
+   | French material | `https://raw.githubusercontent.com/CodytTorgerson/knight-models-for-tts/master/french_knights.mtl` |
+   | English model | `https://raw.githubusercontent.com/CodytTorgerson/knight-models-for-tts/master/english_knights.obj` |
+   | English material | `https://raw.githubusercontent.com/CodytTorgerson/knight-models-for-tts/master/english_knights.mtl` |
+
+   Paste the matching `.obj` URL into TTS's **Model/Mesh** field and the matching `.mtl` URL into the **Material/Diffuse** field.
 
 2. **In Tabletop Simulator:**
    - Open a game/table.
