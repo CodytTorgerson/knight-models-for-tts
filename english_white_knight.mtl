@@ -1,0 +1,7 @@
+# Generated MTL for Tabletop Simulator
+newmtl english_white_knight
+Ka 0.5 0.5 0.5
+Kd 1.0 1.0 1.0
+Ks 0.2 0.2 0.2
+Ns 20
+map_Kd english_white_knight.png
